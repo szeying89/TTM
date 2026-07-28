@@ -9,3 +9,4 @@ export * from "./risk.js";
 export * from "./mitigations.js";
 export * from "./design-enrich.js";
 export * from "./validation.js";
+export * from "./report-artifacts.js";
