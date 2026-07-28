@@ -156,4 +156,39 @@ describe.skipIf(!runIntegration)("api-server (integration)", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual([]);
   });
+
+  it("lists pipeline runs for a project, newest first", async () => {
+    const project = await createProject();
+    const first = await app.inject({ method: "POST", url: `/projects/${project.id}/pipeline-runs`, payload: {} });
+    const second = await app.inject({ method: "POST", url: `/projects/${project.id}/pipeline-runs`, payload: {} });
+
+    const response = await app.inject({ method: "GET", url: `/projects/${project.id}/pipeline-runs` });
+    expect(response.statusCode).toBe(200);
+    const runs = response.json();
+    expect(runs.map((r: { id: string }) => r.id)).toEqual([second.json().id, first.json().id]);
+  });
+
+  it("404s listing pipeline runs for a nonexistent project", async () => {
+    const response = await app.inject({ method: "GET", url: "/projects/00000000-0000-0000-0000-000000000000/pipeline-runs" });
+    expect(response.statusCode).toBe(404);
+  });
+
+  it("returns an empty signal list for an intel feed with no extracted signals yet", async () => {
+    const project = await createProject();
+    const feedResponse = await app.inject({
+      method: "POST",
+      url: `/projects/${project.id}/intel-feeds`,
+      payload: { url: "https://example.com/advisory" },
+    });
+    const feed = feedResponse.json();
+
+    const response = await app.inject({ method: "GET", url: `/intel-feeds/${feed.id}/signals` });
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual([]);
+  });
+
+  it("404s reading signals for a nonexistent intel feed", async () => {
+    const response = await app.inject({ method: "GET", url: "/intel-feeds/00000000-0000-0000-0000-000000000000/signals" });
+    expect(response.statusCode).toBe(404);
+  });
 });

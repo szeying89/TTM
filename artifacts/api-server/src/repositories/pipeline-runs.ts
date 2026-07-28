@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import type { MitreFramework } from "@intel-threat-modeller/contracts";
 import type { Db } from "../db/client.js";
 import { pipelineRuns } from "../db/schema/pipeline.js";
@@ -29,5 +29,13 @@ export class PipelineRunsRepository {
   async findById(id: string) {
     const [run] = await this.db.select().from(pipelineRuns).where(eq(pipelineRuns.id, id)).limit(1);
     return run;
+  }
+
+  async listByProject(projectId: string) {
+    return this.db
+      .select()
+      .from(pipelineRuns)
+      .where(eq(pipelineRuns.projectId, projectId))
+      .orderBy(desc(pipelineRuns.createdAt));
   }
 }

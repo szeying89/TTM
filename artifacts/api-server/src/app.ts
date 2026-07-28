@@ -20,7 +20,7 @@ export interface BuildAppOptions {
 export async function buildApp({ db, uploadsDir, llmClient, embeddingClient }: BuildAppOptions): Promise<FastifyInstance> {
   const app = Fastify({ logger: false });
 
-  await app.register(cors, { origin: true });
+  await app.register(cors, { origin: true, methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"] });
   await app.register(multipart);
 
   registerProjectRoutes(app, db);

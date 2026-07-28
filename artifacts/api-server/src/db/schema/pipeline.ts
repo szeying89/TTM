@@ -26,6 +26,7 @@ export const pipelineRuns = pgTable("pipeline_runs", {
   status: pipelineRunStatusEnum("status").notNull().default("pending"),
   startedAt: timestamp("started_at", { withTimezone: true }),
   finishedAt: timestamp("finished_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const pipelineSteps = pgTable("pipeline_steps", {

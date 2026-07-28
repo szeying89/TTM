@@ -40,6 +40,13 @@ export function registerPipelineRunRoutes(app: FastifyInstance, db: Db): void {
     return reply.code(202).send(run);
   });
 
+  app.get("/projects/:id/pipeline-runs", async (request, reply) => {
+    const { id } = request.params as { id: string };
+    const project = await projectsRepo.findById(id);
+    if (!project) return reply.code(404).send({ error: "Project not found" });
+    return runsRepo.listByProject(id);
+  });
+
   app.get("/pipeline-runs/:id", async (request, reply) => {
     const { id } = request.params as { id: string };
     const run = await runsRepo.findById(id);

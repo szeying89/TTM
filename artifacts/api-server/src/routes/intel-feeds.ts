@@ -62,4 +62,11 @@ export function registerIntelFeedRoutes(app: FastifyInstance, db: Db, options: I
     if (!project) return reply.code(404).send({ error: "Project not found" });
     return intelFeedsRepo.listByProject(id);
   });
+
+  app.get("/intel-feeds/:feedId/signals", async (request, reply) => {
+    const { feedId } = request.params as { feedId: string };
+    const feed = await intelFeedsRepo.findById(feedId);
+    if (!feed) return reply.code(404).send({ error: "Intel feed item not found" });
+    return intelFeedsRepo.listSignals(feedId);
+  });
 }

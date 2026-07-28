@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import type { Db } from "../db/client.js";
-import { intelFeedItems } from "../db/schema/intel.js";
+import { intelFeedItems, intelSignals } from "../db/schema/intel.js";
 
 export class IntelFeedsRepository {
   constructor(private readonly db: Db) {}
@@ -32,5 +32,14 @@ export class IntelFeedsRepository {
 
   async listByProject(projectId: string) {
     return this.db.select().from(intelFeedItems).where(eq(intelFeedItems.projectId, projectId));
+  }
+
+  async findById(id: string) {
+    const [item] = await this.db.select().from(intelFeedItems).where(eq(intelFeedItems.id, id)).limit(1);
+    return item;
+  }
+
+  async listSignals(intelFeedItemId: string) {
+    return this.db.select().from(intelSignals).where(eq(intelSignals.intelFeedItemId, intelFeedItemId));
   }
 }
