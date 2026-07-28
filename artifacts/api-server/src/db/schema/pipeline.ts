@@ -1,5 +1,6 @@
 import { integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { projects } from "./projects.js";
+import { mitreFrameworkEnum } from "./technique-chunks.js";
 
 export const pipelineRunStatusEnum = pgEnum("pipeline_run_status", [
   "pending",
@@ -21,6 +22,7 @@ export const pipelineRuns = pgTable("pipeline_runs", {
   projectId: uuid("project_id")
     .notNull()
     .references(() => projects.id),
+  framework: mitreFrameworkEnum("framework").notNull().default("enterprise"),
   status: pipelineRunStatusEnum("status").notNull().default("pending"),
   startedAt: timestamp("started_at", { withTimezone: true }),
   finishedAt: timestamp("finished_at", { withTimezone: true }),

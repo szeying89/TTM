@@ -1,15 +1,19 @@
 import type { LLMClient } from "@intel-threat-modeller/llm-client";
+import type { EmbeddingClient } from "@intel-threat-modeller/embeddings";
 import type { Db } from "../db/client.js";
 import { registerAgent } from "./registry.js";
 import { createArchitectAgentDescriptor } from "./architect/index.js";
+import { createThreatAgentDescriptor } from "./threat/index.js";
 
 export interface AgentBootstrapDeps {
   db: Db;
   llmClient: LLMClient;
+  embeddingClient: EmbeddingClient;
 }
 
 export function registerAllAgents(deps: AgentBootstrapDeps): void {
   registerAgent(createArchitectAgentDescriptor(deps));
-  // Threat, Risk, Mitigation, Design-Enrich, Validation, and Reporting agents
+  registerAgent(createThreatAgentDescriptor(deps));
+  // Risk, Mitigation, Design-Enrich, Validation, and Reporting agents
   // register here as their phases land.
 }

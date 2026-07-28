@@ -1,4 +1,6 @@
 import type { FastifyInstance } from "fastify";
+import { z } from "zod";
+import { MitreFramework } from "@intel-threat-modeller/contracts";
 import type { Db } from "../db/client.js";
 import { getRegistry } from "../agents/registry.js";
 import { DrizzlePipelineStepsLedger } from "../orchestrator/drizzle-ledger.js";
@@ -20,6 +22,8 @@ async function executeRun(db: Db, runId: string): Promise<void> {
   }
 }
 
+const CreatePipelineRunBody = z.object({ framework: MitreFramework.default("enterprise") });
+
 export function registerPipelineRunRoutes(app: FastifyInstance, db: Db): void {
   const projectsRepo = new ProjectsRepository(db);
   const runsRepo = new PipelineRunsRepository(db);
@@ -30,7 +34,8 @@ export function registerPipelineRunRoutes(app: FastifyInstance, db: Db): void {
     const project = await projectsRepo.findById(id);
     if (!project) return reply.code(404).send({ error: "Project not found" });
 
-    const run = await runsRepo.create(id);
+    const body = CreatePipelineRunBody.parse(request.body ?? {});
+    const run = await runsRepo.create(id, body.framework);
     void executeRun(db, run.id);
     return reply.code(202).send(run);
   });

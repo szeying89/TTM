@@ -1,14 +1,15 @@
 import { eq } from "drizzle-orm";
+import type { MitreFramework } from "@intel-threat-modeller/contracts";
 import type { Db } from "../db/client.js";
 import { pipelineRuns } from "../db/schema/pipeline.js";
 
 export class PipelineRunsRepository {
   constructor(private readonly db: Db) {}
 
-  async create(projectId: string) {
+  async create(projectId: string, framework: MitreFramework = "enterprise") {
     const [run] = await this.db
       .insert(pipelineRuns)
-      .values({ projectId, status: "pending" })
+      .values({ projectId, framework, status: "pending" })
       .returning();
     if (!run) throw new Error("Failed to insert pipeline_runs row");
     return run;
