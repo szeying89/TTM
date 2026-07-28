@@ -11,12 +11,13 @@ afterAll(() => server.close());
 
 describe("VoyageEmbeddingClient", () => {
   it("requests embeddings for each text and returns them in input order", async () => {
-    let capturedBody: { model: string; input: string[] };
+    let capturedBody: { model: string; input: string[] } | undefined;
     server.use(
       http.post("https://api.voyageai.com/v1/embeddings", async ({ request }) => {
-        capturedBody = await request.json();
+        const body = (await request.json()) as { model: string; input: string[] };
+        capturedBody = body;
         return HttpResponse.json({
-          data: capturedBody.input.map((_: string, index: number) => ({
+          data: body.input.map((_: string, index: number) => ({
             embedding: [index, index + 1],
             index,
           })),
@@ -27,8 +28,8 @@ describe("VoyageEmbeddingClient", () => {
     const client = new VoyageEmbeddingClient("test-key", "voyage-3-large");
     const result = await client.embed(["alpha", "beta"]);
 
-    expect(capturedBody.model).toBe("voyage-3-large");
-    expect(capturedBody.input).toEqual(["alpha", "beta"]);
+    expect(capturedBody?.model).toBe("voyage-3-large");
+    expect(capturedBody?.input).toEqual(["alpha", "beta"]);
     expect(result).toEqual([
       [0, 1],
       [1, 2],

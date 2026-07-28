@@ -12,15 +12,20 @@ afterAll(() => server.close());
 
 describe("AnthropicLLMClient", () => {
   it("sends a forced tool_choice request shaped from the caller's schema", async () => {
-    let capturedBody: { model: string; tools: { name: string }[]; tool_choice: unknown };
+    let capturedBody: { model: string; tools: { name: string }[]; tool_choice: unknown } | undefined;
     server.use(
       http.post("https://api.anthropic.com/v1/messages", async ({ request }) => {
-        capturedBody = await request.json();
+        const body = (await request.json()) as {
+          model: string;
+          tools: { name: string }[];
+          tool_choice: unknown;
+        };
+        capturedBody = body;
         return HttpResponse.json({
           id: "msg_1",
           type: "message",
           role: "assistant",
-          model: capturedBody.model,
+          model: body.model,
           content: [
             {
               type: "tool_use",
@@ -48,8 +53,8 @@ describe("AnthropicLLMClient", () => {
 
     expect(result.data).toEqual({ foo: "bar" });
     expect(result.usage).toEqual({ inputTokens: 10, outputTokens: 5 });
-    expect(capturedBody.tool_choice).toEqual({ type: "tool", name: "TestSchema" });
-    expect(capturedBody.tools[0].name).toBe("TestSchema");
+    expect(capturedBody?.tool_choice).toEqual({ type: "tool", name: "TestSchema" });
+    expect(capturedBody?.tools[0]?.name).toBe("TestSchema");
   });
 
   it("throws if the response has no tool_use block", async () => {
