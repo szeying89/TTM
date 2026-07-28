@@ -3,6 +3,7 @@ import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "../db/schema/index.js";
 import { pipelineRuns } from "../db/schema/pipeline.js";
+import { projects } from "../db/schema/projects.js";
 import { DrizzlePipelineStepsLedger } from "./drizzle-ledger.js";
 
 const runIntegration = !!process.env.DATABASE_URL;
@@ -17,7 +18,8 @@ describe.skipIf(!runIntegration)("DrizzlePipelineStepsLedger (integration)", () 
     pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
     db = drizzle(pool, { schema });
     ledger = new DrizzlePipelineStepsLedger(db);
-    const [run] = await db.insert(pipelineRuns).values({ projectId: "00000000-0000-0000-0000-000000000000" }).returning();
+    const [project] = await db.insert(projects).values({ name: "Ledger integration test project" }).returning();
+    const [run] = await db.insert(pipelineRuns).values({ projectId: project!.id }).returning();
     runId = run!.id;
   });
 

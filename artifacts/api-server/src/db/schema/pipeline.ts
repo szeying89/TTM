@@ -1,4 +1,5 @@
 import { integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { projects } from "./projects.js";
 
 export const pipelineRunStatusEnum = pgEnum("pipeline_run_status", [
   "pending",
@@ -17,7 +18,9 @@ export const pipelineStepStatusEnum = pgEnum("pipeline_step_status", [
 
 export const pipelineRuns = pgTable("pipeline_runs", {
   id: uuid("id").defaultRandom().primaryKey(),
-  projectId: uuid("project_id").notNull(),
+  projectId: uuid("project_id")
+    .notNull()
+    .references(() => projects.id),
   status: pipelineRunStatusEnum("status").notNull().default("pending"),
   startedAt: timestamp("started_at", { withTimezone: true }),
   finishedAt: timestamp("finished_at", { withTimezone: true }),
