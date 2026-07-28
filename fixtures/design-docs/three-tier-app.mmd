@@ -1,0 +1,10 @@
+flowchart TD
+  subgraph Public["Public-facing tier"]
+    Browser[Web Browser]
+    API[API Gateway]
+  end
+  subgraph Internal["Internal network"]
+    DB[(Order Database)]
+  end
+  Browser -->|HTTPS| API
+  API -->|SQL over internal network| DB
