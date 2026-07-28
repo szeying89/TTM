@@ -4,6 +4,7 @@ import type { Db } from "../db/client.js";
 import { registerAgent } from "./registry.js";
 import { createArchitectAgentDescriptor } from "./architect/index.js";
 import { createThreatAgentDescriptor } from "./threat/index.js";
+import { createRiskAgentDescriptor } from "./risk/index.js";
 
 export interface AgentBootstrapDeps {
   db: Db;
@@ -14,6 +15,7 @@ export interface AgentBootstrapDeps {
 export function registerAllAgents(deps: AgentBootstrapDeps): void {
   registerAgent(createArchitectAgentDescriptor(deps));
   registerAgent(createThreatAgentDescriptor(deps));
-  // Risk, Mitigation, Design-Enrich, Validation, and Reporting agents
-  // register here as their phases land.
+  registerAgent(createRiskAgentDescriptor(deps));
+  // Mitigation, Design-Enrich, Validation, and Reporting agents register
+  // here as their phases land.
 }

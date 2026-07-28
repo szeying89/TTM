@@ -5,3 +5,4 @@ export * from "./intel.js";
 export * from "./reports.js";
 export * from "./system-model.js";
 export * from "./threats.js";
+export * from "./risk.js";
