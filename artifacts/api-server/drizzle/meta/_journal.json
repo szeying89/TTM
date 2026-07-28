@@ -43,6 +43,13 @@
       "when": 1785245663582,
       "tag": "0005_glorious_harrier",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1785254115079,
+      "tag": "0006_cuddly_black_panther",
+      "breakpoints": true
     }
   ]
 }

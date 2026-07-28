@@ -6,3 +6,5 @@ export * from "./reports.js";
 export * from "./system-model.js";
 export * from "./threats.js";
 export * from "./risk.js";
+export * from "./mitigations.js";
+export * from "./design-enrich.js";
