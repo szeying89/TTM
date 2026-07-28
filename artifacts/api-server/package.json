@@ -4,6 +4,11 @@
   "private": true,
   "type": "module",
   "main": "./dist/server.js",
+  "exports": {
+    ".": "./dist/server.js",
+    "./db/client": "./dist/db/client.js",
+    "./db/schema": "./dist/db/schema/index.js"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsx watch src/server.ts",

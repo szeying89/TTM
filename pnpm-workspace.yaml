@@ -3,6 +3,7 @@ packages:
   - "artifacts/*"
   - "frontend"
   - "mcp-server"
+  - "kb/ingest"
 allowBuilds:
   esbuild: true
   msw: true
