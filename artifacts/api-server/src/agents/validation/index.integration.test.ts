@@ -12,22 +12,29 @@ describe.skipIf(!runIntegration)("validation agent (integration)", () => {
   let pool: pg.Pool;
   let db: ReturnType<typeof drizzle<typeof schema>>;
 
+  let seededChunkId: string;
+
   beforeAll(async () => {
     pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
     db = drizzle(pool, { schema });
-    await db.insert(schema.techniqueChunks).values({
-      techniqueId: "T-VAL-1",
-      framework: "enterprise",
-      name: "Test technique",
-      tactic: "Initial Access",
-      chunkType: "description",
-      chunkText: "fixture",
-      embedding: oneHotVector(5),
-      contentHash: `val-${Math.random()}`,
-    });
+    const [row] = await db
+      .insert(schema.techniqueChunks)
+      .values({
+        techniqueId: "T-VAL-1",
+        framework: "enterprise",
+        name: "Test technique",
+        tactic: "Initial Access",
+        chunkType: "description",
+        chunkText: "fixture",
+        embedding: oneHotVector(5),
+        contentHash: `val-${Math.random()}`,
+      })
+      .returning();
+    seededChunkId = row!.id;
   });
 
   afterAll(async () => {
+    await db.delete(schema.techniqueChunks).where(eq(schema.techniqueChunks.id, seededChunkId));
     await pool.end();
   });
 

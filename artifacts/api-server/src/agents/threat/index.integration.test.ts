@@ -48,6 +48,9 @@ describe.skipIf(!runIntegration)("threat agent (integration, mocked LLM + embedd
   });
 
   afterAll(async () => {
+    for (const id of Object.values(chunkIds)) {
+      await db.delete(schema.techniqueChunks).where(eq(schema.techniqueChunks.id, id));
+    }
     await pool.end();
   });
 

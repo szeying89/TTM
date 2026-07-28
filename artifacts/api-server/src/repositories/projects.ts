@@ -29,6 +29,15 @@ export class ProjectsRepository {
     return project;
   }
 
+  async list() {
+    return this.db.select().from(projects);
+  }
+
+  async update(id: string, input: Partial<CreateProjectInput>) {
+    const [project] = await this.db.update(projects).set(input).where(eq(projects.id, id)).returning();
+    return project;
+  }
+
   async addDesignDoc(projectId: string, prose: string, mermaidText: string) {
     const [doc] = await this.db
       .insert(designDocs)

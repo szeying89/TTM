@@ -2,6 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "../../db/schema/index.js";
+import { eq } from "drizzle-orm";
 import { computeCoverageCritic } from "./coverage-critic.js";
 import { oneHotVector } from "../../test-utils/vector-fixtures.js";
 
@@ -10,25 +11,33 @@ const runIntegration = !!process.env.DATABASE_URL;
 describe.skipIf(!runIntegration)("computeCoverageCritic (integration)", () => {
   let pool: pg.Pool;
   let db: ReturnType<typeof drizzle<typeof schema>>;
+  const seededIds: string[] = [];
 
   beforeAll(async () => {
     pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
     db = drizzle(pool, { schema });
     for (const techniqueId of ["T-COV-1", "T-COV-2", "T-COV-3", "T-COV-4"]) {
-      await db.insert(schema.techniqueChunks).values({
-        techniqueId,
-        framework: "enterprise",
-        name: techniqueId,
-        tactic: "Initial Access",
-        chunkType: "description",
-        chunkText: "fixture",
-        embedding: oneHotVector(4),
-        contentHash: `cov-${techniqueId}-${Math.random()}`,
-      });
+      const [row] = await db
+        .insert(schema.techniqueChunks)
+        .values({
+          techniqueId,
+          framework: "enterprise",
+          name: techniqueId,
+          tactic: "Initial Access",
+          chunkType: "description",
+          chunkText: "fixture",
+          embedding: oneHotVector(4),
+          contentHash: `cov-${techniqueId}-${Math.random()}`,
+        })
+        .returning();
+      seededIds.push(row!.id);
     }
   });
 
   afterAll(async () => {
+    for (const id of seededIds) {
+      await db.delete(schema.techniqueChunks).where(eq(schema.techniqueChunks.id, id));
+    }
     await pool.end();
   });
 

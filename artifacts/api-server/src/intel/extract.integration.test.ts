@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "../db/schema/index.js";
 import type { LLMClient, StructuredCompletionRequest, StructuredCompletionResponse } from "@intel-threat-modeller/llm-client";
 import type { EmbeddingClient } from "@intel-threat-modeller/embeddings";
+import { eq } from "drizzle-orm";
 import { extractIntelSignals } from "./extract.js";
 import { oneHotVector } from "../test-utils/vector-fixtures.js";
 
@@ -41,6 +42,7 @@ describe.skipIf(!runIntegration)("extractIntelSignals (integration)", () => {
   });
 
   afterAll(async () => {
+    await db.delete(schema.techniqueChunks).where(eq(schema.techniqueChunks.id, phishingChunkId));
     await pool.end();
   });
 

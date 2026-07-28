@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "../../db/schema/index.js";
 import { runRulePack } from "./rule-pack.js";
 import type { LoadedSystemModel } from "./read-system-model.js";
+import { eq } from "drizzle-orm";
 import { oneHotVector } from "../../test-utils/vector-fixtures.js";
 
 const runIntegration = !!process.env.DATABASE_URL;
@@ -11,18 +12,23 @@ const runIntegration = !!process.env.DATABASE_URL;
 describe.skipIf(!runIntegration)("runRulePack (integration)", () => {
   let pool: pg.Pool;
   let db: ReturnType<typeof drizzle<typeof schema>>;
+  const seededIds: string[] = [];
 
   const seedTechnique = async (techniqueId: string) => {
-    await db.insert(schema.techniqueChunks).values({
-      techniqueId,
-      framework: "enterprise",
-      name: techniqueId,
-      tactic: "Initial Access",
-      chunkType: "description",
-      chunkText: "test fixture chunk",
-      embedding: oneHotVector(1),
-      contentHash: `test-${techniqueId}-${Math.random()}`,
-    });
+    const [row] = await db
+      .insert(schema.techniqueChunks)
+      .values({
+        techniqueId,
+        framework: "enterprise",
+        name: techniqueId,
+        tactic: "Initial Access",
+        chunkType: "description",
+        chunkText: "test fixture chunk",
+        embedding: oneHotVector(1),
+        contentHash: `test-${techniqueId}-${Math.random()}`,
+      })
+      .returning();
+    seededIds.push(row!.id);
   };
 
   beforeAll(async () => {
@@ -34,6 +40,9 @@ describe.skipIf(!runIntegration)("runRulePack (integration)", () => {
   });
 
   afterAll(async () => {
+    for (const id of seededIds) {
+      await db.delete(schema.techniqueChunks).where(eq(schema.techniqueChunks.id, id));
+    }
     await pool.end();
   });
 
