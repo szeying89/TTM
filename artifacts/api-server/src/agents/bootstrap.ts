@@ -7,6 +7,7 @@ import { createThreatAgentDescriptor } from "./threat/index.js";
 import { createRiskAgentDescriptor } from "./risk/index.js";
 import { createMitigationAgentDescriptor } from "./mitigation/index.js";
 import { createDesignEnrichAgentDescriptor } from "./design-enrich/index.js";
+import { createValidationAgentDescriptor } from "./validation/index.js";
 
 export interface AgentBootstrapDeps {
   db: Db;
@@ -20,5 +21,6 @@ export function registerAllAgents(deps: AgentBootstrapDeps): void {
   registerAgent(createRiskAgentDescriptor(deps));
   registerAgent(createMitigationAgentDescriptor(deps));
   registerAgent(createDesignEnrichAgentDescriptor(deps));
-  // Validation and Reporting agents register here as their phases land.
+  registerAgent(createValidationAgentDescriptor(deps));
+  // Reporting agent registers here as its phase lands.
 }

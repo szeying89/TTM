@@ -8,3 +8,4 @@ export * from "./threats.js";
 export * from "./risk.js";
 export * from "./mitigations.js";
 export * from "./design-enrich.js";
+export * from "./validation.js";
