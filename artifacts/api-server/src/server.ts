@@ -6,9 +6,11 @@ import { registerAllAgents } from "./agents/bootstrap.js";
 
 async function main() {
   const db = createDb();
-  registerAllAgents({ db, llmClient: new AnthropicLLMClient(), embeddingClient: new VoyageEmbeddingClient() });
+  const llmClient = new AnthropicLLMClient();
+  const embeddingClient = new VoyageEmbeddingClient();
+  registerAllAgents({ db, llmClient, embeddingClient });
 
-  const app = await buildApp({ db });
+  const app = await buildApp({ db, llmClient, embeddingClient });
   const port = Number(process.env.API_PORT ?? 4000);
   await app.listen({ port, host: "0.0.0.0" });
   console.log(`api-server listening on :${port}`);

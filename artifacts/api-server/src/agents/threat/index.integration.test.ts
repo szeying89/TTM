@@ -6,13 +6,14 @@ import * as schema from "../../db/schema/index.js";
 import type { LLMClient, StructuredCompletionRequest, StructuredCompletionResponse } from "@intel-threat-modeller/llm-client";
 import type { EmbeddingClient } from "@intel-threat-modeller/embeddings";
 import { createThreatAgentDescriptor } from "./index.js";
+import { oneHotVector } from "../../test-utils/vector-fixtures.js";
 
 const runIntegration = !!process.env.DATABASE_URL;
 
-class ZeroEmbeddingClient implements EmbeddingClient {
+class FixedEmbeddingClient implements EmbeddingClient {
   readonly dimensions = 1024;
   async embed(texts: string[]): Promise<number[][]> {
-    return texts.map(() => Array.from({ length: 1024 }, () => 0));
+    return texts.map(() => oneHotVector(2));
   }
 }
 
@@ -31,7 +32,7 @@ describe.skipIf(!runIntegration)("threat agent (integration, mocked LLM + embedd
         tactic: "Initial Access",
         chunkType: "description",
         chunkText,
-        embedding: Array.from({ length: 1024 }, () => 0),
+        embedding: oneHotVector(2),
         contentHash: `test-${techniqueId}-${Math.random()}`,
       })
       .returning();
@@ -123,7 +124,7 @@ describe.skipIf(!runIntegration)("threat agent (integration, mocked LLM + embedd
     const descriptor = createThreatAgentDescriptor({
       db,
       llmClient: new MockLLMClient(),
-      embeddingClient: new ZeroEmbeddingClient(),
+      embeddingClient: new FixedEmbeddingClient(),
     });
 
     const result = await descriptor.handler({ runId: run!.id });

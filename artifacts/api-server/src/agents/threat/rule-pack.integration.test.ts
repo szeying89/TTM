@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "../../db/schema/index.js";
 import { runRulePack } from "./rule-pack.js";
 import type { LoadedSystemModel } from "./read-system-model.js";
+import { oneHotVector } from "../../test-utils/vector-fixtures.js";
 
 const runIntegration = !!process.env.DATABASE_URL;
 
@@ -19,7 +20,7 @@ describe.skipIf(!runIntegration)("runRulePack (integration)", () => {
       tactic: "Initial Access",
       chunkType: "description",
       chunkText: "test fixture chunk",
-      embedding: Array.from({ length: 1024 }, () => 0),
+      embedding: oneHotVector(1),
       contentHash: `test-${techniqueId}-${Math.random()}`,
     });
   };
