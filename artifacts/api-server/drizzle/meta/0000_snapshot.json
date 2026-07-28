@@ -1,0 +1,169 @@
+{
+  "id": "7538f159-6e74-47ad-9732-0ee865497e95",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.technique_chunks": {
+      "name": "technique_chunks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "technique_id": {
+          "name": "technique_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "framework": {
+          "name": "framework",
+          "type": "mitre_framework",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tactic": {
+          "name": "tactic",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "chunk_type": {
+          "name": "chunk_type",
+          "type": "chunk_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "chunk_text": {
+          "name": "chunk_text",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "embedding": {
+          "name": "embedding",
+          "type": "vector(1024)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "content_hash": {
+          "name": "content_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ingested_at": {
+          "name": "ingested_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "technique_chunks_technique_id_idx": {
+          "name": "technique_chunks_technique_id_idx",
+          "columns": [
+            {
+              "expression": "technique_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "technique_chunks_framework_idx": {
+          "name": "technique_chunks_framework_idx",
+          "columns": [
+            {
+              "expression": "framework",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "technique_chunks_content_hash_idx": {
+          "name": "technique_chunks_content_hash_idx",
+          "columns": [
+            {
+              "expression": "content_hash",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.chunk_type": {
+      "name": "chunk_type",
+      "schema": "public",
+      "values": [
+        "description",
+        "detection",
+        "mitigation",
+        "example"
+      ]
+    },
+    "public.mitre_framework": {
+      "name": "mitre_framework",
+      "schema": "public",
+      "values": [
+        "enterprise",
+        "ics",
+        "atlas"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

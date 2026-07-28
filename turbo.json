@@ -1,0 +1,29 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalPassThroughEnv": [
+    "DATABASE_URL",
+    "ANTHROPIC_API_KEY",
+    "VOYAGE_API_KEY",
+    "RUN_LIVE_API_TESTS",
+    "LLM_DEFAULT_MODEL",
+    "LLM_FAST_MODEL",
+    "EMBEDDING_MODEL"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "lint": {
+      "outputs": []
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    }
+  }
+}
