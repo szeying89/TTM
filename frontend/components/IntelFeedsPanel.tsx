@@ -61,6 +61,13 @@ export function IntelFeedsPanel({ projectId }: { projectId: string }) {
 
   useEffect(refresh, [projectId]);
 
+  useEffect(() => {
+    const hasPending = feeds.some((f) => f.status === "pending");
+    if (!hasPending) return;
+    const interval = setInterval(refresh, 3000);
+    return () => clearInterval(interval);
+  }, [feeds]);
+
   const handleUrlSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setSubmitting(true);

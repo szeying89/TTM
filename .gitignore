@@ -8,3 +8,7 @@ dist/
 coverage/
 kb/ingest/data/
 .DS_Store
+artifacts/api-server/reports/
+artifacts/api-server/uploads/
+frontend/test-results/
+frontend/playwright-report/
