@@ -1,0 +1,23 @@
+flowchart TD
+  subgraph Corporate["Corporate IT zone (Level 4-5)"]
+    IT[Corporate IT Network]
+  end
+  subgraph Supervisory["Supervisory control zone (Level 2-3)"]
+    EWS[Engineering Workstation]
+    HMI[HMI]
+    SCADA[SCADA Server]
+    Historian[(Historian)]
+  end
+  subgraph Field["Field control zone (Level 0-1)"]
+    PLC[PLC]
+    Pump((Chlorine Dosing Pump))
+    Sensor((Level Sensor))
+  end
+  IT -->|occasional maintenance connection| EWS
+  IT -->|reporting queries| Historian
+  EWS -->|PLC programming| SCADA
+  HMI -->|operator commands| SCADA
+  SCADA -->|Modbus/TCP| PLC
+  SCADA -->|historize telemetry| Historian
+  PLC -->|actuate| Pump
+  Sensor -->|level reading| PLC
