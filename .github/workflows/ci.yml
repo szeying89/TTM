@@ -46,8 +46,27 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Migrate test database
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/intel_threat_modeller_test
+        run: pnpm --filter @intel-threat-modeller/api-server run db:migrate
+
       - name: Test
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/intel_threat_modeller_test
           RUN_LIVE_API_TESTS: "0"
         run: pnpm test
+
+      - name: Install Playwright browser
+        run: pnpm --filter @intel-threat-modeller/frontend exec playwright install --with-deps chromium
+
+      - name: Frontend e2e (mocked LLM/embeddings fast path)
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/intel_threat_modeller_test
+          CI: "1"
+        run: pnpm --filter @intel-threat-modeller/frontend run e2e
+
+      - name: Smoke e2e (referential integrity across all 3 fixtures)
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/intel_threat_modeller_test
+        run: pnpm --filter @intel-threat-modeller/api-server run smoke-e2e

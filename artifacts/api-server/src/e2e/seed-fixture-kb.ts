@@ -1,4 +1,5 @@
 import { like } from "drizzle-orm";
+import type { MitreFramework } from "@intel-threat-modeller/contracts";
 import type { Db } from "../db/client.js";
 import { techniqueChunks } from "../db/schema/technique-chunks.js";
 import { oneHotVector } from "../test-utils/vector-fixtures.js";
@@ -23,9 +24,10 @@ export async function seedFixtureKb(db: Db): Promise<void> {
     .where(like(techniqueChunks.contentHash, `${CONTENT_HASH_PREFIX}%`));
   const existingHashes = new Set(existing.map((r) => r.contentHash));
 
-  const fixtures = [
+  const fixtures: { techniqueId: string; framework: MitreFramework; name: string; tactic: string; chunkText: string; index: number }[] = [
     {
       techniqueId: "T9001",
+      framework: "enterprise",
       name: "Fixture Phishing Technique",
       tactic: "Initial Access",
       chunkText: "An adversary sends a phishing email to gain initial access to the target environment.",
@@ -33,6 +35,7 @@ export async function seedFixtureKb(db: Db): Promise<void> {
     },
     {
       techniqueId: "T9002",
+      framework: "enterprise",
       name: "Fixture Valid Accounts Technique",
       tactic: "Defense Evasion",
       chunkText: "An adversary uses valid, compromised credentials to blend in with legitimate traffic.",
@@ -40,9 +43,34 @@ export async function seedFixtureKb(db: Db): Promise<void> {
     },
     {
       techniqueId: "T9003",
+      framework: "enterprise",
       name: "Fixture Data Exfiltration Technique",
       tactic: "Exfiltration",
       chunkText: "An adversary exfiltrates data over an existing command and control channel.",
+      index: E2E_QUERY_VECTOR_INDEX + 2,
+    },
+    {
+      techniqueId: "T9101",
+      framework: "ics",
+      name: "Fixture Unauthorized Command Message Technique",
+      tactic: "Impair Process Control",
+      chunkText: "An adversary sends unauthorized command messages to a PLC to change a physical process's setpoint.",
+      index: E2E_QUERY_VECTOR_INDEX,
+    },
+    {
+      techniqueId: "T9102",
+      framework: "ics",
+      name: "Fixture Program Download Technique",
+      tactic: "Lateral Movement",
+      chunkText: "An adversary transfers modified control logic to a PLC via an engineering workstation.",
+      index: E2E_QUERY_VECTOR_INDEX + 1,
+    },
+    {
+      techniqueId: "T9103",
+      framework: "ics",
+      name: "Fixture Loss of Safety Technique",
+      tactic: "Impact",
+      chunkText: "An adversary disables or manipulates a safety instrumented function to allow an unsafe physical state.",
       index: E2E_QUERY_VECTOR_INDEX + 2,
     },
   ];
@@ -52,7 +80,7 @@ export async function seedFixtureKb(db: Db): Promise<void> {
     if (existingHashes.has(contentHash)) continue;
     await db.insert(techniqueChunks).values({
       techniqueId: fixture.techniqueId,
-      framework: "enterprise",
+      framework: fixture.framework,
       name: fixture.name,
       tactic: fixture.tactic,
       chunkType: "description",

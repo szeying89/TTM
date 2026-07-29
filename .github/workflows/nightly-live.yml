@@ -1,0 +1,59 @@
+name: Nightly live-API verification
+
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  live-verification:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: intel_threat_modeller_nightly
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/intel_threat_modeller_nightly
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
+      RUN_LIVE_API_TESTS: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Migrate database
+        run: pnpm --filter @intel-threat-modeller/api-server run db:migrate
+
+      - name: Refresh full MITRE ATT&CK/ATLAS/ICS knowledge base (live Voyage embeddings)
+        run: pnpm run kb:refresh
+
+      - name: Run full test suite including live-API-gated tests
+        run: pnpm test
+
+      - name: Notify on failure
+        if: failure()
+        run: echo "::error::Nightly live-API verification failed - check the KB refresh and live-API test steps above."

@@ -1,8 +1,14 @@
+import { existsSync } from "node:fs";
 import { defineConfig } from "@playwright/test";
 
 const API_PORT = process.env.E2E_API_PORT ?? "4100";
 const WEB_PORT = process.env.E2E_WEB_PORT ?? "3100";
 const DATABASE_URL = process.env.DATABASE_URL ?? "postgres://postgres:postgres@localhost:5432/intel_threat_modeller";
+
+// This sandbox pre-installs Chromium at a fixed path instead of via `playwright install`;
+// everywhere else (CI, a developer's machine) falls back to Playwright's own resolution.
+const SANDBOX_CHROMIUM_PATH = "/opt/pw-browsers/chromium";
+const executablePath = existsSync(SANDBOX_CHROMIUM_PATH) ? SANDBOX_CHROMIUM_PATH : undefined;
 
 export default defineConfig({
   testDir: "./e2e",
@@ -12,9 +18,7 @@ export default defineConfig({
   reporter: "list",
   use: {
     baseURL: `http://localhost:${WEB_PORT}`,
-    launchOptions: {
-      executablePath: "/opt/pw-browsers/chromium",
-    },
+    launchOptions: executablePath ? { executablePath } : {},
   },
   webServer: [
     {

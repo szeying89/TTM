@@ -1,0 +1,22 @@
+flowchart TD
+  subgraph Public["Public-facing tier"]
+    Browser[Web Browser]
+    Gateway[API Gateway]
+  end
+  subgraph Internal["Private internal network"]
+    OrderSvc[Order Service]
+    OrderDB[(Order Database)]
+    PaymentSvc[Payment Service]
+    Queue[[Message Queue]]
+    Fulfillment[Fulfillment Worker]
+  end
+  subgraph External["External third-party tier"]
+    Processor((External Payment Processor))
+  end
+  Browser -->|HTTPS| Gateway
+  Gateway -->|REST/HTTPS| OrderSvc
+  OrderSvc -->|SQL| OrderDB
+  OrderSvc -->|REST/HTTPS| PaymentSvc
+  PaymentSvc -->|HTTPS outbound| Processor
+  OrderSvc -->|publish order-paid event| Queue
+  Queue -->|consume order-paid event| Fulfillment
