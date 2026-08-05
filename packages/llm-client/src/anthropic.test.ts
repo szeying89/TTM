@@ -4,6 +4,16 @@ import { setupServer } from "msw/node";
 import { z } from "zod";
 import { AnthropicLLMClient } from "./anthropic.js";
 
+interface AnthropicMessageResponse {
+  id: string;
+  type: string;
+  role: string;
+  model: string;
+  content: { type: string; id?: string; name?: string; input?: unknown; text?: string }[];
+  stop_reason: string;
+  usage: { input_tokens: number; output_tokens: number };
+}
+
 const server = setupServer();
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
@@ -14,14 +24,14 @@ describe("AnthropicLLMClient", () => {
   it("sends a forced tool_choice request shaped from the caller's schema", async () => {
     let capturedBody: { model: string; tools: { name: string }[]; tool_choice: unknown } | undefined;
     server.use(
-      http.post("https://api.anthropic.com/v1/messages", async ({ request }) => {
+      http.post<never, never, AnthropicMessageResponse>("https://api.anthropic.com/v1/messages", async ({ request }) => {
         const body = (await request.json()) as {
           model: string;
           tools: { name: string }[];
           tool_choice: unknown;
         };
         capturedBody = body;
-        return HttpResponse.json({
+        return HttpResponse.json<AnthropicMessageResponse>({
           id: "msg_1",
           type: "message",
           role: "assistant",
@@ -59,8 +69,8 @@ describe("AnthropicLLMClient", () => {
 
   it("throws if the response has no tool_use block", async () => {
     server.use(
-      http.post("https://api.anthropic.com/v1/messages", () =>
-        HttpResponse.json({
+      http.post<never, never, AnthropicMessageResponse>("https://api.anthropic.com/v1/messages", () =>
+        HttpResponse.json<AnthropicMessageResponse>({
           id: "msg_1",
           type: "message",
           role: "assistant",
