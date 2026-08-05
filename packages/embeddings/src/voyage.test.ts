@@ -3,6 +3,10 @@ import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { VoyageEmbeddingClient } from "./voyage.js";
 
+interface VoyageEmbeddingResponse {
+  data: { embedding: number[]; index: number }[];
+}
+
 const server = setupServer();
 
 beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
@@ -13,10 +17,10 @@ describe("VoyageEmbeddingClient", () => {
   it("requests embeddings for each text and returns them in input order", async () => {
     let capturedBody: { model: string; input: string[] } | undefined;
     server.use(
-      http.post("https://api.voyageai.com/v1/embeddings", async ({ request }) => {
+      http.post<never, never, VoyageEmbeddingResponse>("https://api.voyageai.com/v1/embeddings", async ({ request }) => {
         const body = (await request.json()) as { model: string; input: string[] };
         capturedBody = body;
-        return HttpResponse.json({
+        return HttpResponse.json<VoyageEmbeddingResponse>({
           data: body.input.map((_: string, index: number) => ({
             embedding: [index, index + 1],
             index,
@@ -40,10 +44,10 @@ describe("VoyageEmbeddingClient", () => {
   it("batches requests larger than 128 texts", async () => {
     let requestCount = 0;
     server.use(
-      http.post("https://api.voyageai.com/v1/embeddings", async ({ request }) => {
+      http.post<never, never, VoyageEmbeddingResponse>("https://api.voyageai.com/v1/embeddings", async ({ request }) => {
         requestCount += 1;
         const body = (await request.json()) as { input: string[] };
-        return HttpResponse.json({
+        return HttpResponse.json<VoyageEmbeddingResponse>({
           data: body.input.map((_, index) => ({ embedding: [index], index })),
         });
       }),
